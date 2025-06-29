@@ -16,7 +16,7 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public void setRoom(int roomNumber, RoomType roomType, double roomPricePerNight) {
-        var room = new Room(roomType,roomNumber,roomPricePerNight,true);
+        var room = new Room(roomType,roomNumber,roomPricePerNight);
         checkRoom(room);
     }
 

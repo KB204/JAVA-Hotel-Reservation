@@ -42,16 +42,18 @@ public class BookingServiceImpl implements BookingService {
 
         var booking = new Booking(generateBookingNumber(),room,checkIn,checkOut,LocalDate.now(),user);
         checkBooking(booking);
-        double bookingTotal = bookingTotalAmount(booking);
-        booking.setTotalPrice(bookingTotal);
-        bookings.add(booking);
 
-        // update user balance after the booking is successful
-        double updatedBalance = calculateBookingTotal(booking);
-        user.setBalance(updatedBalance);
+        if (!roomIsAvailable(booking)) {
+            throw new ResourceNotFoundException(format("Room number %s is not available for the give date",booking.getRoom().getRoomNumber()));
+        } else {
+            double bookingTotal = bookingTotalAmount(booking);
+            booking.setTotalPrice(bookingTotal);
+            bookings.add(booking);
 
-        // update the status of the room
-        room.setAvailable(false);
+            // update user balance after the booking is successful
+            double updatedBalance = calculateBookingTotal(booking);
+            user.setBalance(updatedBalance);
+        }
     }
 
     @Override
@@ -62,24 +64,28 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private void checkBooking(Booking booking) {
-        if (!booking.getRoom().isAvailable())
-            throw new ResourceNotFoundException(format("Room number %s is not available",booking.getRoom().getRoomNumber()));
         if (booking.getCheckOutDate().isBefore(booking.getCheckInDate()) || booking.getCheckOutDate().equals(booking.getCheckInDate()))
             throw new ResourceNotFoundException("CheckOut Date cannot be after or equals to the CheckIn Date");
         if (booking.getCheckInDate().isBefore(LocalDate.now()))
             throw new ResourceNotFoundException("CheckIn Date is invalid");
     }
 
-    private int generateBookingNumber() {
-        Random random = new Random();
-        return random.nextInt(100_000,999_999);
+    private boolean roomIsAvailable(Booking booking) {
+        return bookings.stream()
+                .filter(b -> b.getRoom().getRoomNumber() == booking.getRoom().getRoomNumber())
+                .noneMatch(b -> datesConflict(booking.getCheckInDate(), booking.getCheckOutDate(), b.getCheckInDate(), b.getCheckOutDate()));
+    }
+
+    private boolean datesConflict(LocalDate start1, LocalDate end1, LocalDate start2, LocalDate end2) {
+        return !end1.isBefore(start2) && !start1.isAfter(end2);
     }
 
     private double calculateBookingTotal(Booking booking) {
-        // get the nbr of the nights requested by the user
+        // Get the nbr of the nights requested by the user
         long nbrNights = ChronoUnit.DAYS.between(booking.getCheckInDate(), booking.getCheckOutDate());
         double totalPrice = nbrNights * booking.getRoom().getPricePerNight();
         double userInitialBalance = booking.getUser().getBalance();
+
         if (userInitialBalance < totalPrice){
             throw new ResourceNotFoundException("User Balance Not Enough to book this room for the given period");
         } else {
@@ -88,8 +94,13 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private double bookingTotalAmount(Booking booking) {
-        // get the nbr of the nights requested by the user
+        // Get the nbr of the nights requested by the user then calculate the total amount based on it
         long nbrNights = ChronoUnit.DAYS.between(booking.getCheckInDate(), booking.getCheckOutDate());
         return nbrNights * booking.getRoom().getPricePerNight();
+    }
+
+    private int generateBookingNumber() {
+        Random random = new Random();
+        return random.nextInt(100_000,999_999);
     }
 }

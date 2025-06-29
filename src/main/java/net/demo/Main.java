@@ -27,15 +27,16 @@ public class Main {
 
         // Create Users
         UserService userService = new UserServiceImpl();
-        userService.setUser(1,50000);
+        userService.setUser(1,5000);
         userService.setUser(2,10000);
         List<User> users = userService.getAllUsers();
 
         // creation of bookings
         BookingService bookingService = new BookingServiceImpl(rooms, users);
         bookingService.bookRoom(1,1, LocalDate.of(2025,6,30) ,LocalDate.of(2025,7,2));
-        bookingService.bookRoom(2,2, LocalDate.of(2025,6,30) ,LocalDate.of(2025,7,3));
-        bookingService.bookRoom(3,3, LocalDate.of(2025,7,30) ,LocalDate.of(2025,8,30));
+        bookingService.bookRoom(2,1, LocalDate.of(2025,7,30) ,LocalDate.of(2025,8,3));
+
+        System.out.println("*******************************************************");
 
         // printAll the booking
         bookingService.printAll();

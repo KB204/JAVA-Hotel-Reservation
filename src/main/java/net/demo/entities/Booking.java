@@ -91,14 +91,14 @@ public class Booking {
 
     @Override
     public String toString() {
-        return "Booking{" +
-                "bookingID=" + bookingID +
-                ", room=" + room +
-                ", checkInDate=" + checkInDate +
-                ", checkOutDate=" + checkOutDate +
-                ", bookingDate=" + bookingDate +
-                ", totalPrice=" + totalPrice +
-                ", user=" + user +
-                '}';
+        return "\nBooking{" +
+                "\n  bookingID=" + bookingID +
+                ",\n  checkInDate=" + checkInDate +
+                ",\n  checkOutDate=" + checkOutDate +
+                ",\n  bookingDate=" + bookingDate +
+                ",\n  totalPrice=" + totalPrice +
+                ",\n  room=" + room +
+                ",\n  user=" + user +
+                "\n}";
     }
 }
